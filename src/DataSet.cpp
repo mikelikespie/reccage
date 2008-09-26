@@ -33,21 +33,53 @@ void DataSet::removeActor(KeyId actor)
 
 KeyFloatPairVec DataSet::getSimilarities(KeyId actor, DistanceFunction df)
 {
-	// FIXME Throw exception if actor not exist
-	KeyFloatPairVec v;
-	v.reserve(myMap.size());
 
 	ActorObjectMap::iterator f = myMap.find(actor);
 	if(f != myMap.end()) {
 		ObjectValueMap *a = f->second;
-
-		for(ActorObjectMap::iterator i = myMap.begin(); i != myMap.end(); i++) {
-			v.push_back(KeyFloatPair((*i).first, df(a, i->second)));
-			df(a, i->second);
-		}
-
+		return getSimilarities(a, df);
+	} else {
+		return KeyFloatPairVec();
 	}
+}
+
+
+KeyFloatPairVec DataSet::getSimilarities(ObjectValueMap *p1, DistanceFunction df) {
+	KeyFloatPairVec v;
+	v.reserve(myMap.size());
+
+
+	for(ActorObjectMap::iterator i = myMap.begin(); i != myMap.end(); i++) {
+		//v.push_back(KeyFloatPair((*i).first, df(p1, i->second)));
+		df(p1, i->second);
+	}
+
 	return v;
+}
+
+
+KeyFloatPairVec DataSet::getTopKSimilar(KeyId actor, int k, DistanceFunction df)
+{
+	KeyFloatPairVec v = KeyFloatPairVec();
+
+
+	return v;
+}
+KeyFloatPairVec DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df)
+{
+	KeyFloatPairVec v = KeyFloatPairVec();
+
+
+	return v;
+}
+
+ObjectValueMap *DataSet::getActorMap(KeyId actor) {
+	ActorObjectMap::iterator f = myMap.find(actor);
+	if(f != myMap.end()) {
+		return f->second;
+	} else {
+		return NULL;
+	}
 }
 
 void DataSet::iterateThroughTest(KeyId actor, DistanceFunction df)
@@ -63,13 +95,6 @@ void DataSet::iterateThroughTest(KeyId actor, DistanceFunction df)
 	}
 }
 
-KeyFloatPairVec DataSet::getTopKSimilar(KeyId actor, int k, DistanceFunction df)
-{
-	KeyFloatPairVec v = KeyFloatPairVec();
-
-
-	return v;
-}
 
 void DataSet::addOrUpdateValue(KeyId actor, KeyId object, const float value)
 {

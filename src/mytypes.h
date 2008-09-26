@@ -8,14 +8,17 @@
 #ifndef MYTYPES_H_
 #define MYTYPES_H_
 
+//#define USE_HASH_MAPS
+
+#ifdef USE_HASH_MAPS
 #include <hash_map.h>
+#endif
 #include <map>
 #include <string>
 #include <vector>
 
 typedef unsigned long KeyId;
 
-#define USE_HASH_MAPS
 
 #ifdef USE_HASH_MAPS
 

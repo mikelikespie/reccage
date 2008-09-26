@@ -16,7 +16,8 @@
 #include <math.h>
 
 #include "mytypes.h"
-#include "StringDataSet.h"
+#include "ConcurrentDataSet.h"
+#include "ConcurrentDataSetPool.h"
 
 using namespace std;
 
@@ -128,7 +129,8 @@ float pearsonDistanceOrdered(ObjectValueMap *p1, ObjectValueMap *p2) {
 }
 #endif
 
-static void populateDataSet(StringDataSet &ds) {
+template <class K>
+static void populateDataSet(K &ds) {
 
 	ds.addOrUpdateValue("Lisa Rose", "Lady in the Water", 2.5);
 	ds.addOrUpdateValue("Lisa Rose", "Snakes on a Plane", 3.5);
@@ -172,19 +174,16 @@ static void populateDataSet(StringDataSet &ds) {
 	ds.addOrUpdateValue("Toby", "Snakes on a Plane", 4.5);
 	ds.addOrUpdateValue("Toby", "You, Me and Dupree", 1.0);
 	ds.addOrUpdateValue("Toby", "Superman Returns", 4.0);
-
-
-
 }
 
-static void perform() {
+template <class K>
+void perform( K &ds) {
 
 
 	timeval a,b,c;
-	DataSet ds;
 
-	for(KeyId i = 0; i < 100000; i++) {
-		for(KeyId j = 0; j < 10; j++) {
+	for(KeyId i = 0; i < 400000; i++) {
+		for(KeyId j = 0; j < 5; j++) {
 			ds.addOrUpdateValue(i, j + (i % 100), 1.4);
 		}
 		if(!((i + 1) % 100000)) {
@@ -192,35 +191,35 @@ static void perform() {
 		}
 	}
 
-	for( int i = 0; i < 10; i++) {
+#ifdef USE_HASH_MAPS
+	for( int i = 0; i < 100; i++) {
 		gettimeofday(&a, NULL);
-		ds.iterateThroughTest(3, pearsonDistance);
+		ds.getSimilarities(3, pearsonDistance);
 		gettimeofday(&b, NULL);
 		timersub(&b,&a,&c);
 		printf("%.15f\n",  (double)c.tv_sec + (double)c.tv_usec / 1000000.0 );
 	}
 
-	cout << "Resizing" << endl;
-
-#ifndef USE_HASH_MAPS
-	for( int i = 0; i < 10; i++) {
-		gettimeofday(&a, NULL);
-		ds.iterateThroughTest(3, pearsonDistanceOrdered);
-		gettimeofday(&b, NULL);
-		timersub(&b,&a,&c);
-		printf("%.15f\n",  (double)c.tv_sec + (double)c.tv_usec / 1000000.0 );
+#else
+	gettimeofday(&a, NULL);
+	for( int i = 0; i < 1000; i++) {
+		ds.getSimilarities(i, pearsonDistanceOrdered);
 	}
+	gettimeofday(&b, NULL);
+	timersub(&b,&a,&c);
+	printf("%.15f\n",  ((double)c.tv_sec + (double)c.tv_usec / 1000000.0 )/ 1000.0 );
 #endif
 
 
 }
-int main() {
 
+template <class K>
+static void testBookVals(K &ds) {
+//	ds.startThread();
+	populateDataSet<K>(ds);
 
-	StringDataSet ds;
-
-	populateDataSet(ds);
 #ifndef USE_HASH_MAPS
+	//KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistanceOrdered);
 	KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistanceOrdered);
 #else
 	KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistance);
@@ -229,10 +228,32 @@ int main() {
 	cout << "Lisa Rose:" << endl;
 
 	for(KeyFloatPairVec::iterator i = v.begin(); i != v.end(); i++) {
-		cout << "k\t" << ds.lookupName((*i).first) << ":\t" << (*i).second << endl;
+		cout << "k\t" << ds.lookupActor((*i).first) << ":\t" << (*i).second << endl;
 	}
 
-	perform();
+}
+
+
+int main() {
+
+	DataSet ds;
+	StringWrapper<DataSet> sw(ds);
+	testBookVals<StringWrapper<DataSet> >(sw);
+
+	ConcurrentDataSetPool dp(6);
+	StringWrapper<ConcurrentDataSetPool> sws(dp);
+
+	testBookVals<StringWrapper<ConcurrentDataSetPool> >(sws);
+
+	{
+	DataSet ds1;
+	perform<DataSet>(ds1);
+	}
+//	perform<ConcurrentDataSet >();
+	{
+	ConcurrentDataSetPool ds2(4);
+	perform<ConcurrentDataSetPool >(ds2);
+	}
 
 	return 0;
 }

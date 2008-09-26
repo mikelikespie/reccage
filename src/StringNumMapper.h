@@ -8,20 +8,20 @@
 #ifndef STRINGNUMMAPPER_H_
 #define STRINGNUMMAPPER_H_
 
+#include <map>
 #include <limits>
-#include <hash_map.h>
 #include <vector>
 #include <string.h>
 
-struct streq
+struct strlt
 {
   inline bool operator()(const char* s1, const char* s2) const
   {
-    return strcmp(s1, s2) == 0;
+    return strcmp(s1, s2) < 0;
   }
 };
 
-typedef __gnu_cxx::hash_map<const char *, KeyId, __gnu_cxx::hash<char *>, streq> StringNumMapperMap;
+typedef std::map<const char *, KeyId, strlt> StringNumMapperMap;
 
 //TODO Add support for deletion eventually
 class StringNumMapper {
