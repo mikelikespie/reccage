@@ -49,9 +49,22 @@ void DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df, Floa
 	ret.clear();
 	ret.reserve(myMap.size());
 
+	float min = 0.0;
+	bool used_min = false;
+
 	for(ActorObjectMap::iterator i = myMap.begin(); i != myMap.end(); i++) {
 		float val = df(a, i->second);
+
+		if(!used_min)
+			min = val;
+#if 0
+		if(k == -1 || (int)ret.size() < k || min < val) {
+			ret.push_back(pair<float, KeyId>(val, (*i).first));
+			min = std::min<float>(min, val);
+		}
+#else
 		ret.push_back(pair<float, KeyId>(val, (*i).first));
+#endif
 	}
 
 	sort(ret.begin(), ret.end(), PairSortPredicate);
