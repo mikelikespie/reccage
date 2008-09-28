@@ -193,7 +193,7 @@ void perform( K &ds) {
 
 	gettimeofday(&a, NULL);
 	for( int i = 0; i < 100; i++) {
-		FloatKeyMultiMap v;
+		FloatKeyVec v;
 		ds.getTopKSimilar(i, 100, pearsonDistanceOrdered, v);
 	}
 	gettimeofday(&b, NULL);
@@ -209,15 +209,15 @@ static void testBookVals(K &ds) {
 
 #ifndef USE_HASH_MAPS
 	//KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistanceOrdered);
-	FloatKeyMultiMap v;
+	FloatKeyVec v;
 	ds.getTopKSimilar("Lisa Rose", -1, pearsonDistanceOrdered, v);
 #else
-	FloatKeyMultiMap v = ds.getSimilarities("Lisa Rose", pearsonDistance);
+	FloatKeyVec v = ds.getSimilarities("Lisa Rose", pearsonDistance);
 #endif
 
 	cout << "Lisa Rose:" << endl;
 
-	for(FloatKeyMultiMap::iterator i = v.begin(); i != v.end(); i++) {
+	for(FloatKeyVec::iterator i = v.begin(); i != v.end(); i++) {
 		cout << "k\t" << ds.lookupActor((*i).second) << ":\t" << (*i).first << endl;
 	}
 

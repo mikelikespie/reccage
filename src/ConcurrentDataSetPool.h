@@ -28,7 +28,7 @@ public:
 	}
 
 
-	void getTopKSimilar(KeyId actor, int k, DistanceFunction df, FloatKeyMultiMap &ret) {
+	void getTopKSimilar(KeyId actor, int k, DistanceFunction df, FloatKeyVec &ret) {
 		ObjectValueMap *actorMap = dataSets[actor % nThreads].getActorMap(actor);
 		if(actorMap) {
 			return getTopKSimilar(actorMap, k, df, ret);
@@ -37,8 +37,8 @@ public:
 		}
 	}
 
-	void mergeVecs(FloatKeyMultiMap * retvec, int nVecs, int k, FloatKeyMultiMap &ret) {
-		FloatKeyMultiMap::iterator *its = new FloatKeyMultiMap::iterator[nThreads];
+	void mergeVecs(FloatKeyVec * retvec, int nVecs, int k, FloatKeyVec &ret) {
+		FloatKeyVec::iterator *its = new FloatKeyVec::iterator[nThreads];
 		for(int i = 0; i < nThreads; i++ ) {
 			its[i] = retvec[i].begin();
 		}
@@ -49,7 +49,7 @@ public:
 			ret.reserve(k);
 
 		while(k == -1 || (int)ret.size() < k) {
-			FloatKeyMultiMap::iterator *max = NULL;
+			FloatKeyVec::iterator *max = NULL;
 
 			for(int i = 0; i < nVecs; i++) {
 				if(its[i] != retvec[i].end() &&
@@ -68,7 +68,7 @@ public:
 		delete[] its;
 	}
 
-	void getTopKSimilar(ObjectValueMap *actorMap, int k, DistanceFunction df, FloatKeyMultiMap &ret) {
+	void getTopKSimilar(ObjectValueMap *actorMap, int k, DistanceFunction df, FloatKeyVec &ret) {
 
 		ret.clear();
 
@@ -77,10 +77,10 @@ public:
 		}
 
 
-		FloatKeyMultiMap *retvec = new FloatKeyMultiMap[nThreads];
+		FloatKeyVec *retvec = new FloatKeyVec[nThreads];
 		//TODO implement a more efficient merge algo
 		for(int i = 0; i < nThreads; i++) {
-			FloatKeyMultiMap v2;
+			FloatKeyVec v2;
 			dataSets[i].getTopKSimilar(retvec[i]);
 		}
 

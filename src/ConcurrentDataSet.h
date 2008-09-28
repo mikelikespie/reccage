@@ -32,7 +32,7 @@ private:
 		DistanceFunction df;
 		int k; //-1 = return all
 
-		FloatKeyMultiMap similaritiesRet;
+		FloatKeyVec similaritiesRet;
 	} functionParams;
 
 	volatile bool finished;
@@ -79,7 +79,7 @@ public:
 
 	}
 
-	void getTopKSimilar(FloatKeyMultiMap &ret) {
+	void getTopKSimilar(FloatKeyVec &ret) {
 		//Now we have to wait for the mutex to unlock
 		pthread_mutex_lock(&mutex_run);
 		while (!finished) {

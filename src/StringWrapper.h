@@ -18,11 +18,11 @@ public:
 	virtual ~StringWrapper() {};
 
 
-	inline void getTopKSimilar(const char * actor, int k, DistanceFunction df, FloatKeyMultiMap &ret) {
+	inline void getTopKSimilar(const char * actor, int k, DistanceFunction df, FloatKeyVec &ret) {
 		return obj.getTopKSimilar(actorMapper.getKey(actor), k, df, ret);
 	}
 
-	inline void getTopKSimilar(ObjectValueMap *objmap, int k, DistanceFunction df, FloatKeyMultiMap &ret) {
+	inline void getTopKSimilar(ObjectValueMap *objmap, int k, DistanceFunction df, FloatKeyVec &ret) {
 		return obj.getTopKSimilar(objmap, k, df, ret);
 	}
 
