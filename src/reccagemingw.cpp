@@ -241,7 +241,7 @@ int main() {
 	}
 //	perform<ConcurrentDataSet >();
 	{
-	ConcurrentDataSetPool ds2(3);
+	ConcurrentDataSetPool ds2(4);
 	perform<ConcurrentDataSetPool >(ds2);
 	}
 

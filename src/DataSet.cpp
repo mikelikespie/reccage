@@ -43,19 +43,22 @@ void DataSet::getTopKSimilar(KeyId actor, int k, DistanceFunction df, FloatKeyMu
 		ret.clear();
 	}
 }
+
 void DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df, FloatKeyMultiMap &ret)
 {
 	ret.clear();
 	ret.reserve(myMap.size());
+
 	for(ActorObjectMap::iterator i = myMap.begin(); i != myMap.end(); i++) {
 		float val = df(a, i->second);
-		if(k == -1 || (int)ret.size() < k ||
-				ret.begin()->first < val) {
-			ret.push_back(pair<float, KeyId>(val, (*i).first));
-		}
+		ret.push_back(pair<float, KeyId>(val, (*i).first));
 	}
 
 	sort(ret.begin(), ret.end(), PairSortPredicate);
+
+	if(k >= 0) {
+		ret.resize(std::min<int>(k, ret.size()));
+	}
 
 }
 

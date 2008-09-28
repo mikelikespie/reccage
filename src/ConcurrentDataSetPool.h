@@ -37,6 +37,37 @@ public:
 		}
 	}
 
+	void mergeVecs(FloatKeyMultiMap * retvec, int nVecs, int k, FloatKeyMultiMap &ret) {
+		FloatKeyMultiMap::iterator *its = new FloatKeyMultiMap::iterator[nThreads];
+		for(int i = 0; i < nThreads; i++ ) {
+			its[i] = retvec[i].begin();
+		}
+
+		ret.clear();
+
+		if(k != -1)
+			ret.reserve(k);
+
+		while(k == -1 || (int)ret.size() < k) {
+			FloatKeyMultiMap::iterator *max = NULL;
+
+			for(int i = 0; i < nVecs; i++) {
+				if(its[i] != retvec[i].end() &&
+					(max == NULL || its[i]->first > (*max)->first )) {
+					max = &(its[i]);
+				}
+			}
+
+			if(max == NULL) {
+				break;
+			} else {
+				ret.push_back(*(*max));
+				++(*max);
+			}
+		}
+		delete[] its;
+	}
+
 	void getTopKSimilar(ObjectValueMap *actorMap, int k, DistanceFunction df, FloatKeyMultiMap &ret) {
 
 		ret.clear();
@@ -46,22 +77,16 @@ public:
 		}
 
 
+		FloatKeyMultiMap *retvec = new FloatKeyMultiMap[nThreads];
 		//TODO implement a more efficient merge algo
 		for(int i = 0; i < nThreads; i++) {
 			FloatKeyMultiMap v2;
-			dataSets[i].getTopKSimilar(v2);
-
-			ret.insert(ret.end(), v2.begin(), v2.end());
-
-			//find how many we need to delete
-			int toDelete = k - ret.size();
-
-			if(toDelete > 0) {
-				FloatKeyMultiMap::iterator end = ret.begin();
-				for(int j = 0; j < toDelete; j++) {++end;};
-				ret.erase(ret.begin(), end);
-			}
+			dataSets[i].getTopKSimilar(retvec[i]);
 		}
+
+		mergeVecs(retvec, nThreads, k, ret);
+
+		delete[] retvec;
 	}
 //	void iterateThroughTest(KeyId actor, DistanceFunction df);
 //	KeyFloatPairVec getTopKSimilar(KeyId actor, int k, DistanceFunction df);

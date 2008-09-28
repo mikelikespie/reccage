@@ -29,13 +29,6 @@ public:
 	void addOrUpdateValue(KeyId actor, KeyId object, const float value);
 	void removeValue(KeyId actor, KeyId object);
 	void removeActor(KeyId actor);
-
-	void doubleSize() {
-		//myMap.resize(myMap.bucket_count() * 2);
-	}
-
-	static void cleanUpObjectValueMap(ObjectValueMap * m);
-
 };
 
 

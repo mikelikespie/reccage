@@ -47,8 +47,9 @@ typedef  std::vector<std::pair<float, KeyId> >  FloatKeyMultiMap;
 typedef float (*DistanceFunction) (ObjectValueMap *p1, ObjectValueMap *p2);
 
 
+//Sorts descending
 inline bool PairSortPredicate(const std::pair<float, KeyId>& lhs, const std::pair<float, KeyId>& rhs)
 {
-  return lhs.first < rhs.first;
+  return lhs.first > rhs.first;
 }
 #endif /* MYTYPES_H_ */
