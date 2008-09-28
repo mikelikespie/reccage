@@ -10,12 +10,14 @@
 
 #include <assert.h>
 #include <iostream>
+#include <vector>
 #include "ConcurrentDataSet.h"
 
 class ConcurrentDataSetPool {
 private:
 	int nThreads;
 	ConcurrentDataSet * dataSets;
+
 public:
 	ConcurrentDataSetPool(int threads) : nThreads(threads) {
 		assert(nThreads > 0);
@@ -26,19 +28,40 @@ public:
 	}
 
 
-	KeyFloatPairVec getSimilarities(KeyId actor, DistanceFunction df) {
-		KeyFloatPairVec v;
+	void getTopKSimilar(KeyId actor, int k, DistanceFunction df, FloatKeyMultiMap &ret) {
 		ObjectValueMap *actorMap = dataSets[actor % nThreads].getActorMap(actor);
+		if(actorMap) {
+			return getTopKSimilar(actorMap, k, df, ret);
+		} else {
+			ret.clear();
+		}
+	}
+
+	void getTopKSimilar(ObjectValueMap *actorMap, int k, DistanceFunction df, FloatKeyMultiMap &ret) {
+
+		ret.clear();
+
 		for(int i = 0; i < nThreads; i++) {
-			dataSets[i].startGetSimilarities(actorMap,df);
+			dataSets[i].startGetTopKSimilar(actorMap, k, df);
 		}
 
 
+		//TODO implement a more efficient merge algo
 		for(int i = 0; i < nThreads; i++) {
-			KeyFloatPairVec v2  = dataSets[i].getSimilarities();
-			v.insert(v.end(), v2.begin(), v2.end());
+			FloatKeyMultiMap v2;
+			dataSets[i].getTopKSimilar(v2);
+
+			ret.insert(ret.end(), v2.begin(), v2.end());
+
+			//find how many we need to delete
+			int toDelete = k - ret.size();
+
+			if(toDelete > 0) {
+				FloatKeyMultiMap::iterator end = ret.begin();
+				for(int j = 0; j < toDelete; j++) {++end;};
+				ret.erase(ret.begin(), end);
+			}
 		}
-		return v;
 	}
 //	void iterateThroughTest(KeyId actor, DistanceFunction df);
 //	KeyFloatPairVec getTopKSimilar(KeyId actor, int k, DistanceFunction df);

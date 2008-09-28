@@ -8,7 +8,9 @@
 
 #include <iostream>
 
+
 #include "DataSet.h"
+
 
 using namespace std;
 
@@ -31,46 +33,30 @@ void DataSet::removeActor(KeyId actor)
 	}
 }
 
-KeyFloatPairVec DataSet::getSimilarities(KeyId actor, DistanceFunction df)
+void DataSet::getTopKSimilar(KeyId actor, int k, DistanceFunction df, FloatKeyMultiMap &ret)
 {
-
 	ActorObjectMap::iterator f = myMap.find(actor);
 	if(f != myMap.end()) {
 		ObjectValueMap *a = f->second;
-		return getSimilarities(a, df);
+		return getTopKSimilar(a, k, df, ret);
 	} else {
-		return KeyFloatPairVec();
+		ret.clear();
 	}
 }
-
-
-KeyFloatPairVec DataSet::getSimilarities(ObjectValueMap *p1, DistanceFunction df) {
-	KeyFloatPairVec v;
-	v.reserve(myMap.size());
-
-
+void DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df, FloatKeyMultiMap &ret)
+{
+	ret.clear();
+	ret.reserve(myMap.size());
 	for(ActorObjectMap::iterator i = myMap.begin(); i != myMap.end(); i++) {
-		//v.push_back(KeyFloatPair((*i).first, df(p1, i->second)));
-		df(p1, i->second);
+		float val = df(a, i->second);
+		if(k == -1 || (int)ret.size() < k ||
+				ret.begin()->first < val) {
+			ret.push_back(pair<float, KeyId>(val, (*i).first));
+		}
 	}
 
-	return v;
-}
+	sort(ret.begin(), ret.end(), PairSortPredicate);
 
-
-KeyFloatPairVec DataSet::getTopKSimilar(KeyId actor, int k, DistanceFunction df)
-{
-	KeyFloatPairVec v = KeyFloatPairVec();
-
-
-	return v;
-}
-KeyFloatPairVec DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df)
-{
-	KeyFloatPairVec v = KeyFloatPairVec();
-
-
-	return v;
 }
 
 ObjectValueMap *DataSet::getActorMap(KeyId actor) {
@@ -79,19 +65,6 @@ ObjectValueMap *DataSet::getActorMap(KeyId actor) {
 		return f->second;
 	} else {
 		return NULL;
-	}
-}
-
-void DataSet::iterateThroughTest(KeyId actor, DistanceFunction df)
-{
-	ActorObjectMap::iterator f = myMap.find(actor);
-	if(f != myMap.end()) {
-		ObjectValueMap *a = f->second;
-
-		for(ActorObjectMap::iterator i = myMap.begin(); i != myMap.end(); i++) {
-			df(a, i->second);
-		}
-
 	}
 }
 

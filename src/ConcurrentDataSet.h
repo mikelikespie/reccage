@@ -26,14 +26,13 @@ private:
 	pthread_t thread;
 	pthread_mutex_t mutex_run;
 	pthread_cond_t cond_run;
-	pthread_mutex_t mutex2;
 
 	struct {
 		ObjectValueMap *actorMap;
 		DistanceFunction df;
 		int k; //-1 = return all
 
-		KeyFloatPairVec similaritiesRet;
+		FloatKeyMultiMap similaritiesRet;
 	} functionParams;
 
 	volatile bool finished;
@@ -67,10 +66,10 @@ public:
 		pthread_create(&thread, NULL, startRoutine, (void*) this);
 	}
 
-	void startGetSimilarities(ObjectValueMap *actorMap, DistanceFunction df) {
+	void startGetTopKSimilar(ObjectValueMap *actorMap, int k, DistanceFunction df) {
 		functionParams.actorMap = actorMap;
 		functionParams.df = df;
-		functionParams.k = -1;
+		functionParams.k = k;
 
 
 		pthread_mutex_lock(&mutex_run);
@@ -80,7 +79,7 @@ public:
 
 	}
 
-	KeyFloatPairVec getSimilarities() {
+	void getTopKSimilar(FloatKeyMultiMap &ret) {
 		//Now we have to wait for the mutex to unlock
 		pthread_mutex_lock(&mutex_run);
 		while (!finished) {
@@ -88,13 +87,11 @@ public:
 		}
 		finished = false;
 		pthread_mutex_unlock(&mutex_run);
-		return functionParams.similaritiesRet;
+
+		ret.swap(functionParams.similaritiesRet);
+		functionParams.similaritiesRet.clear();
 	}
 
-	/*
-	 void iterateThroughTest(KeyId actor, DistanceFunction df);
-	 KeyFloatPairVec getTopKSimilar(KeyId actor, int k, DistanceFunction df);
-	 */
 
 private:
 	inline void loop() {
@@ -112,17 +109,8 @@ private:
 			}
 			pthread_mutex_unlock(&mutex_run);
 
-
-			if (functionParams.k == -1) {
-				functionParams.similaritiesRet
-						= DataSet::getSimilarities(functionParams.actorMap,
-								functionParams.df);
-
-			} else {
-				functionParams.similaritiesRet
-						= DataSet::getTopKSimilar(functionParams.actorMap,
-								functionParams.k, functionParams.df);
-			}
+			DataSet::getTopKSimilar(functionParams.actorMap,
+							functionParams.k, functionParams.df, functionParams.similaritiesRet);
 
 			pthread_mutex_lock(&mutex_run);
 			finished = true;

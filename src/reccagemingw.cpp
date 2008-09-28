@@ -8,7 +8,6 @@
 
 #include <iostream>
 #include <pthread.h>
-
 #include <iostream>
 
 #include <sys/time.h>
@@ -18,6 +17,7 @@
 #include "mytypes.h"
 #include "ConcurrentDataSet.h"
 #include "ConcurrentDataSetPool.h"
+#include "StringWrapper.h"
 
 using namespace std;
 
@@ -184,33 +184,22 @@ void perform( K &ds) {
 
 	for(KeyId i = 0; i < 400000; i++) {
 		for(KeyId j = 0; j < 5; j++) {
-			ds.addOrUpdateValue(i, j + (i % 100), 1.4);
+			ds.addOrUpdateValue(i, j + (i % 20), 1.4);
 		}
 		if(!((i + 1) % 100000)) {
 			cout << "finished " << i << endl;
 		}
 	}
 
-#ifdef USE_HASH_MAPS
-	for( int i = 0; i < 100; i++) {
-		gettimeofday(&a, NULL);
-		ds.getSimilarities(3, pearsonDistance);
-		gettimeofday(&b, NULL);
-		timersub(&b,&a,&c);
-		printf("%.15f\n",  (double)c.tv_sec + (double)c.tv_usec / 1000000.0 );
-	}
-
-#else
 	gettimeofday(&a, NULL);
-	for( int i = 0; i < 1000; i++) {
-		ds.getSimilarities(i, pearsonDistanceOrdered);
+	for( int i = 0; i < 100; i++) {
+		FloatKeyMultiMap v;
+		ds.getTopKSimilar(i, 100, pearsonDistanceOrdered, v);
 	}
 	gettimeofday(&b, NULL);
 	timersub(&b,&a,&c);
-	printf("%.15f\n",  ((double)c.tv_sec + (double)c.tv_usec / 1000000.0 )/ 1000.0 );
-#endif
 
-
+	printf("%.15f\n",  ((double)c.tv_sec + (double)c.tv_usec / 1000000.0 )/ 100.0 );
 }
 
 template <class K>
@@ -220,15 +209,16 @@ static void testBookVals(K &ds) {
 
 #ifndef USE_HASH_MAPS
 	//KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistanceOrdered);
-	KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistanceOrdered);
+	FloatKeyMultiMap v;
+	ds.getTopKSimilar("Lisa Rose", -1, pearsonDistanceOrdered, v);
 #else
-	KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistance);
+	FloatKeyMultiMap v = ds.getSimilarities("Lisa Rose", pearsonDistance);
 #endif
 
 	cout << "Lisa Rose:" << endl;
 
-	for(KeyFloatPairVec::iterator i = v.begin(); i != v.end(); i++) {
-		cout << "k\t" << ds.lookupActor((*i).first) << ":\t" << (*i).second << endl;
+	for(FloatKeyMultiMap::iterator i = v.begin(); i != v.end(); i++) {
+		cout << "k\t" << ds.lookupActor((*i).second) << ":\t" << (*i).first << endl;
 	}
 
 }
@@ -251,7 +241,7 @@ int main() {
 	}
 //	perform<ConcurrentDataSet >();
 	{
-	ConcurrentDataSetPool ds2(4);
+	ConcurrentDataSetPool ds2(3);
 	perform<ConcurrentDataSetPool >(ds2);
 	}
 

@@ -35,24 +35,20 @@ typedef __gnu_cxx::hash_map<KeyId, float, __gnu_cxx::hash<KeyId>, keyideq> Objec
 typedef __gnu_cxx::hash_map<KeyId, ObjectValueMap*, __gnu_cxx::hash<KeyId>, keyideq> ActorObjectMap;
 
 #else
-struct keyidlt
-{
-  inline bool operator()(KeyId s1, KeyId s2) const
-  {
-    return s1 < s2;
-  }
-};
 
-
-typedef std::map<KeyId, float, keyidlt> ObjectValueMap;
+typedef std::map<KeyId, float> ObjectValueMap;
 
 //TODO look into making this a vector
-typedef std::map<KeyId, ObjectValueMap*, keyidlt> ActorObjectMap;
+typedef std::map<KeyId, ObjectValueMap*> ActorObjectMap;
 #endif
 
-typedef std::pair<KeyId, float> KeyFloatPair;
-
-typedef std::vector<KeyFloatPair> KeyFloatPairVec;
+//typedef  std::multimap<float, KeyId>  FloatKeyMultiMap;
+typedef  std::vector<std::pair<float, KeyId> >  FloatKeyMultiMap;
 typedef float (*DistanceFunction) (ObjectValueMap *p1, ObjectValueMap *p2);
 
+
+inline bool PairSortPredicate(const std::pair<float, KeyId>& lhs, const std::pair<float, KeyId>& rhs)
+{
+  return lhs.first < rhs.first;
+}
 #endif /* MYTYPES_H_ */
