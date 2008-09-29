@@ -193,8 +193,7 @@ void perform( K &ds) {
 
 	gettimeofday(&a, NULL);
 	for( int i = 0; i < 100; i++) {
-		FloatKeyVec v;
-		ds.getTopKSimilar(i, 100, pearsonDistanceOrdered, v);
+		FloatKeyVec v = ds.getTopKSimilar(i, 100, pearsonDistanceOrdered);
 	}
 	gettimeofday(&b, NULL);
 	timersub(&b,&a,&c);
@@ -209,8 +208,7 @@ static void testBookVals(K &ds) {
 
 #ifndef USE_HASH_MAPS
 	//KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistanceOrdered);
-	FloatKeyVec v;
-	ds.getTopKSimilar("Lisa Rose", 3, pearsonDistanceOrdered, v);
+	FloatKeyVec v = ds.getTopKSimilar("Lisa Rose", 3, pearsonDistanceOrdered);
 #else
 	FloatKeyVec v = ds.getSimilarities("Lisa Rose", pearsonDistance);
 #endif

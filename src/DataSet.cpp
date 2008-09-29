@@ -33,20 +33,22 @@ void DataSet::removeActor(KeyId actor)
 	}
 }
 
-void DataSet::getTopKSimilar(KeyId actor, int k, DistanceFunction df, FloatKeyVec &ret)
+FloatKeyVec DataSet::getTopKSimilar(KeyId actor, int k, DistanceFunction df)
 {
 	ActorObjectMap::iterator f = myMap.find(actor);
 	if(f != myMap.end()) {
 		ObjectValueMap *a = f->second;
-		return getTopKSimilar(a, k, df, ret);
+		return getTopKSimilar(a, k, df);
 	} else {
-		ret.clear();
+		return FloatKeyVec();
 	}
 }
 
-void DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df, FloatKeyVec &ret)
+FloatKeyVec DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df)
 {
-	ret.clear();
+
+	FloatKeyVec ret;
+
 	ret.reserve(myMap.size());
 
 	float min = 0.0;
@@ -72,6 +74,8 @@ void DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df, Floa
 	if(k >= 0) {
 		ret.resize(std::min<int>(k, ret.size()));
 	}
+
+	return ret;
 
 }
 

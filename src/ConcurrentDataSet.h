@@ -79,7 +79,7 @@ public:
 
 	}
 
-	void getTopKSimilar(FloatKeyVec &ret) {
+	FloatKeyVec getTopKSimilar() {
 		//Now we have to wait for the mutex to unlock
 		pthread_mutex_lock(&mutex_run);
 		while (!finished) {
@@ -88,8 +88,7 @@ public:
 		finished = false;
 		pthread_mutex_unlock(&mutex_run);
 
-		ret.swap(functionParams.similaritiesRet);
-		functionParams.similaritiesRet.clear();
+		return functionParams.similaritiesRet;
 	}
 
 
@@ -109,8 +108,8 @@ private:
 			}
 			pthread_mutex_unlock(&mutex_run);
 
-			DataSet::getTopKSimilar(functionParams.actorMap,
-							functionParams.k, functionParams.df, functionParams.similaritiesRet);
+			functionParams.similaritiesRet = DataSet::getTopKSimilar(functionParams.actorMap,
+							functionParams.k, functionParams.df);
 
 			pthread_mutex_lock(&mutex_run);
 			finished = true;

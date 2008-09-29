@@ -28,12 +28,12 @@ public:
 	}
 
 
-	void getTopKSimilar(KeyId actor, int k, DistanceFunction df, FloatKeyVec &ret) {
+	FloatKeyVec getTopKSimilar(KeyId actor, int k, DistanceFunction df) {
 		ObjectValueMap *actorMap = dataSets[actor % nThreads].getActorMap(actor);
 		if(actorMap) {
-			return getTopKSimilar(actorMap, k, df, ret);
+			return getTopKSimilar(actorMap, k, df);
 		} else {
-			ret.clear();
+			return FloatKeyVec();
 		}
 	}
 
@@ -68,9 +68,9 @@ public:
 		delete[] its;
 	}
 
-	void getTopKSimilar(ObjectValueMap *actorMap, int k, DistanceFunction df, FloatKeyVec &ret) {
+	FloatKeyVec getTopKSimilar(ObjectValueMap *actorMap, int k, DistanceFunction df) {
 
-		ret.clear();
+		FloatKeyVec ret;
 
 		for(int i = 0; i < nThreads; i++) {
 			dataSets[i].startGetTopKSimilar(actorMap, k, df);
@@ -81,12 +81,14 @@ public:
 		//TODO implement a more efficient merge algo
 		for(int i = 0; i < nThreads; i++) {
 			FloatKeyVec v2;
-			dataSets[i].getTopKSimilar(retvec[i]);
+			retvec[i] = dataSets[i].getTopKSimilar();
 		}
 
 		mergeVecs(retvec, nThreads, k, ret);
 
 		delete[] retvec;
+
+		return ret;
 	}
 //	void iterateThroughTest(KeyId actor, DistanceFunction df);
 //	KeyFloatPairVec getTopKSimilar(KeyId actor, int k, DistanceFunction df);

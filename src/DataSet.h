@@ -22,8 +22,8 @@ public:
 
 	ObjectValueMap *getActorMap(KeyId actor);
 
-	void getTopKSimilar(KeyId actor, int k, DistanceFunction df, FloatKeyVec &ret);
-	void getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df, FloatKeyVec &ret);
+	FloatKeyVec getTopKSimilar(KeyId actor, int k, DistanceFunction df);
+	FloatKeyVec getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df);
 
 	/*Update Functions */
 	void addOrUpdateValue(KeyId actor, KeyId object, const float value);
