@@ -27,19 +27,17 @@ float pearsonDistanceOrdered(ObjectValueMap *p1, ObjectValueMap *p2) {
 //	return 1.0;
 	while(true) {
 
-		int n1=0, n2=0;
+		int  n2=0;
 
 		while(i != p1->end() && i2 != p2->end() && i->first != i2->first) {
 			if(i->first < i2->first) {
 				++i;
-				n1++;
 			} else {
 				++i2;
 				n2++;
 			}
 		}
 		if(i->first == i2->first) {
-			n1++;
 			n2++;
 		}
 
@@ -49,7 +47,7 @@ float pearsonDistanceOrdered(ObjectValueMap *p1, ObjectValueMap *p2) {
 			break;
 		}
 
-		std::cout << n1 << " - " << n2 << std::endl;
+		std::cout << i->second << ","  <<i2->second << " - " << n2 << std::endl;
 
 		n++;
 

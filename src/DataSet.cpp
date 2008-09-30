@@ -56,7 +56,7 @@ FloatKeyVec DataSet::getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction d
 
 	for(ActorObjectMap::iterator i = myMap.begin(); i != myMap.end(); i++) {
 		float val = df(a, i->second);
-
+		std::cout << "returned " << val << std::endl;
 		if(!used_min)
 			min = val;
 #if 0
