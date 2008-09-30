@@ -18,6 +18,7 @@
 #include "ConcurrentDataSet.h"
 #include "ConcurrentDataSetPool.h"
 #include "StringWrapper.h"
+#include "DistanceFunctions.h"
 
 using namespace std;
 
@@ -68,65 +69,6 @@ float pearsonDistance(ObjectValueMap *p1, ObjectValueMap *p2) {
 }
 
 #ifndef USE_HASH_MAPS
-float pearsonDistanceOrdered(ObjectValueMap *p1, ObjectValueMap *p2) {
-	float sum1 = 0.0f;
-	float sum2 = 0.0f;
-	float sumSq1 = 0.0f;
-	float sumSq2 = 0.0f;
-
-	float pSum = 0.0f;
-
-	int n = 0; // Number of common matches
-
-	ObjectValueMap::iterator i = p1->begin();
-	ObjectValueMap::iterator i2 = p2->begin();
-
-
-	while(true) {
-
-		while(i != p1->end() && i2 != p2->end() && i->first != i2->first) {
-			if(i->first < i2->first)
-				++i;
-			else
-				++i2;
-		}
-
-		if(i == p1->end() || i2 == p2->end()) {
-			break;
-		}
-
-		n++;
-
-		float v1 = (*i).second;
-		float v2 = (*i2).second;
-
-		sum1 += v1;
-		sumSq1 += v1 * v1;
-
-		sum2 += v2;
-		sumSq2 += v2 * v2;
-
-		pSum += v1 * v2;
-
-		++i;
-		++i2;
-	}
-
-	if(n == 0) {
-		return 0.0f;
-	}
-
-	float num = pSum - (sum1 * sum2 / (float)n);
-
-	float den = sqrtf((sumSq1 - sum1 * sum1 / (float)n) * (sumSq2 - sum2 * sum2 / (float)n));
-
-	if(den == 0.0) {
-		return 0.0f;
-	}
-
-	return (float) (num/den);
-
-}
 #endif
 
 template <class K>

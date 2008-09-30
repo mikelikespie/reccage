@@ -52,4 +52,5 @@ inline bool PairSortPredicate(const std::pair<float, KeyId>& lhs, const std::pai
 {
   return lhs.first > rhs.first;
 }
+
 #endif /* MYTYPES_H_ */
