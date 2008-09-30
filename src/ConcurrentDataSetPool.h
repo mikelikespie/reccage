@@ -11,6 +11,8 @@
 #include <assert.h>
 #include <iostream>
 #include <vector>
+
+#include "StringWrapper.h"
 #include "ConcurrentDataSet.h"
 
 class ConcurrentDataSetPool {
@@ -95,7 +97,7 @@ public:
 
 
 	/*Update Functions */
-	void addOrUpdateValue(KeyId actor, KeyId object, const float value) {
+	void addOrUpdateValue(KeyId actor, KeyId object, float value) {
 		dataSets[actor % nThreads].
 			addOrUpdateValue(actor, object, value);
 	}
@@ -114,4 +116,5 @@ public:
 	}
 };
 
+typedef StringWrapper<ConcurrentDataSetPool> ConcurrentStringDataSetPool;
 #endif /* CONCURRENTDATASETPOOL_H_ */

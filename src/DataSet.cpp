@@ -89,7 +89,7 @@ ObjectValueMap *DataSet::getActorMap(KeyId actor) {
 }
 
 
-void DataSet::addOrUpdateValue(KeyId actor, KeyId object, const float value)
+void DataSet::addOrUpdateValue(KeyId actor, KeyId object, float value)
 {
 	ObjectValueMap *a;
 

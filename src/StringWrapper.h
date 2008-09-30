@@ -8,6 +8,8 @@
 #ifndef STRINGWRAPPER_H_
 #define STRINGWRAPPER_H_
 
+#include "StringNumMapper.h"
+
 template <class K> class StringWrapper {
 private:
 	StringNumMapper actorMapper;
@@ -27,7 +29,7 @@ public:
 	}
 
 	/*Update Functions */
-	inline void addOrUpdateValue(const char * actor, const char * object, const float value) {
+	inline void addOrUpdateValue(const char * actor, const char * object, float value) {
 		obj.addOrUpdateValue(actorMapper.getKey(actor), objectMapper.getKey(object), value);
 	}
 

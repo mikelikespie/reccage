@@ -26,7 +26,7 @@ public:
 	FloatKeyVec getTopKSimilar(ObjectValueMap *a, int k, DistanceFunction df);
 
 	/*Update Functions */
-	void addOrUpdateValue(KeyId actor, KeyId object, const float value);
+	void addOrUpdateValue(KeyId actor, KeyId object, float value);
 	void removeValue(KeyId actor, KeyId object);
 	void removeActor(KeyId actor);
 };
