@@ -1,8 +1,13 @@
+cdef inline stringOrNone(char* value):
+    if value is NULL: return None
+    return value
+
 cdef extern from "DistanceFunctions.h":
     ctypedef struct ObjectValueMap
     ctypedef float (*DistanceFunction) (ObjectValueMap *p1, ObjectValueMap *p2)
 
     DistanceFunction pearsonDistanceOrdered
+
 
 
 cdef extern from "ConcurrentDataSetPool.h":
@@ -17,7 +22,7 @@ cdef extern from "ConcurrentDataSetPool.h":
         size_t c_size "size" ()
 
 
-    ctypedef KeyId
+    ctypedef unsigned long KeyId
 
     ctypedef struct c_DataSet "ConcurrentDataSetPool":
         FloatKeyVec getTopKSimilar (KeyId actor, int k, DistanceFunction df)
@@ -67,7 +72,7 @@ cdef class DataSet:
     def getstuff(self):
         return 
 
-    def getTopKSimilar (self, actor, k, df):
+    def getTopKSimilar (self, actor, k = -1, df = DistanceFunctionContainer()):
         if type(df) is not DistanceFunctionContainer:
             raise TypeError("a DistanceFunctionContainer is required")
         cdef FloatKeyVec foo = self.thisptr.getTopKSimilar(actor, k, (<DistanceFunctionContainer>df).getFunc())
@@ -98,12 +103,13 @@ cdef class StringDataSet:
     def getstuff(self):
         return 
 
-    def getTopKSimilar (self, actor, k, df):
+    def getTopKSimilar (self, actor, k = -1, df = DistanceFunctionContainer()):
         if type(df) is not DistanceFunctionContainer:
             raise TypeError("a DistanceFunctionContainer is required")
         cdef FloatKeyVec foo = self.thisptr.getTopKSimilar(actor, k, (<DistanceFunctionContainer>df).getFunc())
         cdef size_t size = foo.c_size()
-        return [(foo.get(n).first, int(foo.get(n).second)) for n in range(size)]
+        return [(foo.get(n).first, \
+            self.thisptr.lookupActor(int(foo.get(n).second))) for n in range(size)]
 
     def addOrUpdateValue (self, actor, obj, value):
         self.thisptr.addOrUpdateValue(actor, obj, value)
@@ -114,9 +120,6 @@ cdef class StringDataSet:
     def removeValue(self, actor, obj):
         self.thisptr.removeValue(actor, obj)
 
-
-    
-
     def lookupActor(self, actor):
-        return <int>self.thisptr.lookupActor(<KeyId>actor)
+        return stringOrNone(<char *>self.thisptr.lookupActor(<unsigned int>int(actor)))
 

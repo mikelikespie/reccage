@@ -42,7 +42,10 @@ public:
 	}
 
 	inline const char * lookupActor(KeyId id) {
-		return actorMapper.getString(id);
+		const char * str = actorMapper.getString(id);
+		return str;
+
+
 	}
 
 	inline const char * lookupObject(KeyId id) {
