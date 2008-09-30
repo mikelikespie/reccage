@@ -75,7 +75,9 @@ cdef class DataSet:
     def getTopKSimilar (self, actor, k = -1, df = DistanceFunctionContainer()):
         if type(df) is not DistanceFunctionContainer:
             raise TypeError("a DistanceFunctionContainer is required")
-        cdef FloatKeyVec foo = self.thisptr.getTopKSimilar(actor, k, (<DistanceFunctionContainer>df).getFunc())
+        cdef FloatKeyVec foo = self.thisptr.getTopKSimilar(actor, k,
+                (<DistanceFunctionContainer>df).getFunc())
+
         cdef size_t size = foo.c_size()
         return [(foo.get(n).first, int(foo.get(n).second)) for n in range(size)]
 

@@ -150,7 +150,7 @@ static void testBookVals(K &ds) {
 
 #ifndef USE_HASH_MAPS
 	//KeyFloatPairVec v = ds.getSimilarities("Lisa Rose", pearsonDistanceOrdered);
-	FloatKeyVec v = ds.getTopKSimilar("Lisa Rose", 3, pearsonDistanceOrdered);
+	FloatKeyVec v = ds.getTopKSimilar("Lisa Rose", -1, pearsonDistanceOrdered);
 #else
 	FloatKeyVec v = ds.getSimilarities("Lisa Rose", pearsonDistance);
 #endif

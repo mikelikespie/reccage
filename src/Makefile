@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-Wall -ggdb3
 LDFLAGS=-lpthread
-SOURCES=ConcurrentDataSet.cpp  DataSet.cpp  reccagemingw.cpp
+SOURCES=ConcurrentDataSet.cpp  DataSet.cpp  reccagemingw.cpp DistanceFunctions.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=reccage
 
