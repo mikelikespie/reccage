@@ -42,6 +42,11 @@ typedef std::map<KeyId, float> ObjectValueMap;
 typedef std::map<KeyId, ObjectValueMap*> ActorObjectMap;
 #endif
 
+
+typedef std::pair<float, float> TotalSimSum;
+
+typedef std::map<KeyId, TotalSimSum> ItemRecMap;
+
 //typedef  std::multimap<float, KeyId>  FloatKeyMultiMap;
 typedef  std::vector<std::pair<float, KeyId> >  FloatKeyVec;
 typedef float (*DistanceFunction) (ObjectValueMap *p1, ObjectValueMap *p2);

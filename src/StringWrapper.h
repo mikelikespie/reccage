@@ -28,6 +28,14 @@ public:
 		return obj.getTopKSimilar(objmap, k, df);
 	}
 
+	inline FloatKeyVec getRecs(const char * actor, int top_k, DistanceFunction df) {
+		return obj.getRecs(actorMapper.getKey(actor), top_k, df);
+	}
+
+	inline ItemRecMap getRecs(FloatKeyVec *k, int top_k, DistanceFunction df) {
+		return obj.getRecs(k, top_k, df);
+	}
+
 	/*Update Functions */
 	inline void addOrUpdateValue(const char * actor, const char * object, float value) {
 		obj.addOrUpdateValue(actorMapper.getKey(actor), objectMapper.getKey(object), value);
@@ -51,6 +59,7 @@ public:
 	inline const char * lookupObject(KeyId id) {
 		return objectMapper.getString(id);
 	}
+
 
 };
 

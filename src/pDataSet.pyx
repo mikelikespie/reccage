@@ -23,7 +23,7 @@ cdef extern from "ConcurrentDataSetPool.h":
 
 
     ctypedef unsigned long KeyId
-
+'''
     ctypedef struct c_DataSet "ConcurrentDataSetPool":
         FloatKeyVec getTopKSimilar (KeyId actor, int k, DistanceFunction df)
         void addOrUpdateValue (KeyId actor, KeyId object, float value)
@@ -31,9 +31,10 @@ cdef extern from "ConcurrentDataSetPool.h":
         void removeActor (KeyId actor)
     c_DataSet *new_DataSet "new ConcurrentDataSetPool" (int nThreads)
     void del_DataSet "delete" (c_DataSet *dataSet)
-
+'''
     ctypedef struct c_StringDataSet "ConcurrentStringDataSetPool":
         FloatKeyVec getTopKSimilar (char * actor, int k, DistanceFunction df)
+        FloatKeyVec getRecs (char * actor, int k, DistanceFunction df)
         void addOrUpdateValue (char * actor, char * object, float value)
         void removeValue (char * actor, char * object)
         void removeActor (char * actor)
@@ -58,7 +59,7 @@ cdef class DistanceFunctionContainer:
     def __dealloc(self):
         pass
 
-
+'''
 
 cdef class DataSet:
     cdef c_DataSet *thisptr
@@ -89,6 +90,8 @@ cdef class DataSet:
 
     def removeValue(self, actor, obj):
         self.thisptr.removeValue(actor, obj)
+
+'''
 
 cdef class StringDataSet:
     cdef c_DataSet *dsptr

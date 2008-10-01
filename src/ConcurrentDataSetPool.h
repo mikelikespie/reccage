@@ -14,6 +14,7 @@
 
 #include "StringWrapper.h"
 #include "ConcurrentDataSet.h"
+#include "futil.h"
 
 class ConcurrentDataSetPool {
 private:
@@ -70,6 +71,8 @@ public:
 		delete[] its;
 	}
 
+
+
 	FloatKeyVec getTopKSimilar(ObjectValueMap *actorMap, int k, DistanceFunction df) {
 
 		FloatKeyVec ret;
@@ -92,6 +95,65 @@ public:
 
 		return ret;
 	}
+
+	void mergeRecs(ItemRecMap &a, ItemRecMap &b) {
+		ItemRecMap::iterator i  = a.begin();
+		ItemRecMap::iterator i2 = b.begin();
+
+		if(i2 == b.end()) {
+			return;
+		}
+
+	//	return 1.0;
+		while(true) {
+
+			while(i2 != b.end() && i != a.end() && i->first < i2->first) {
+				++i;
+			}
+
+			//if they're not equal
+			if(i != a.end() && i->first == i2->first) {
+				i->second.first  += i2->second.first;
+				i->second.second += i2->second.second;
+
+				++i;
+				++i2;
+			} else {
+				a.insert(i, *i2);
+
+				++i2;
+			}
+
+			if(i2 == b.end()) {
+				return;
+			}
+
+		}
+	}
+
+	//TODO parallelize this
+	ItemRecMap getRecs(FloatKeyVec & v)
+	{
+		ItemRecMap ret = dataSets[0].getRecs(v);
+
+		for(int i = 1; i < nThreads; i++) {
+			ItemRecMap r2 = dataSets[i].getRecs(v);
+			mergeRecs(ret, r2);
+		}
+
+		return ret;
+	}
+
+	FloatKeyVec	getRecs(KeyId actor, int top_k, DistanceFunction df) {
+		FloatKeyVec v = getTopKSimilar(actor, top_k, df);
+		return recMapToVecItemRecMap(getRecs(v));
+	}
+
+	ItemRecMap	getRecs(ObjectValueMap *a, int top_k, DistanceFunction df) {
+		FloatKeyVec v = getTopKSimilar(a, top_k, df);
+		return getRecs(v);
+	}
+
 //	void iterateThroughTest(KeyId actor, DistanceFunction df);
 //	KeyFloatPairVec getTopKSimilar(KeyId actor, int k, DistanceFunction df);
 

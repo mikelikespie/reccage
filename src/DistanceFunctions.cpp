@@ -41,13 +41,13 @@ float pearsonDistanceOrdered(ObjectValueMap *p1, ObjectValueMap *p2) {
 			n2++;
 		}
 
-		std::cout << "c=" << std::endl;
+//		std::cout << "c=" << std::endl;
 
 		if(i == p1->end() || i2 == p2->end()) {
 			break;
 		}
 
-		std::cout << i->second << ","  <<i2->second << " - " << n2 << std::endl;
+		//std::cout << i->second << ","  <<i2->second << " - " << n2 << std::endl;
 
 		n++;
 
