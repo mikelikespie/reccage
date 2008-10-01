@@ -23,15 +23,16 @@ cdef extern from "ConcurrentDataSetPool.h":
 
 
     ctypedef unsigned long KeyId
-'''
-    ctypedef struct c_DataSet "ConcurrentDataSetPool":
-        FloatKeyVec getTopKSimilar (KeyId actor, int k, DistanceFunction df)
-        void addOrUpdateValue (KeyId actor, KeyId object, float value)
-        void removeValue (KeyId actor, KeyId object)
-        void removeActor (KeyId actor)
+    ctypedef struct c_DataSet "ConcurrentDataSetPool" #:
+#        FloatKeyVec getTopKSimilar (KeyId actor, int k, DistanceFunction df)
+#        void addOrUpdateValue (KeyId actor, KeyId object, float value)
+#        void removeValue (KeyId actor, KeyId object)
+#        void removeActor (KeyId actor)
     c_DataSet *new_DataSet "new ConcurrentDataSetPool" (int nThreads)
     void del_DataSet "delete" (c_DataSet *dataSet)
-'''
+
+    
+
     ctypedef struct c_StringDataSet "ConcurrentStringDataSetPool":
         FloatKeyVec getTopKSimilar (char * actor, int k, DistanceFunction df)
         FloatKeyVec getRecs (char * actor, int k, DistanceFunction df)
@@ -39,6 +40,7 @@ cdef extern from "ConcurrentDataSetPool.h":
         void removeValue (char * actor, char * object)
         void removeActor (char * actor)
         char * lookupActor(KeyId id)
+        char * lookupObject(KeyId id)
     c_StringDataSet *new_StringDataSet "new ConcurrentStringDataSetPool" (c_DataSet d)
     void del_StringDataSet "delete" (c_StringDataSet *stringDataSet)
 
@@ -59,39 +61,37 @@ cdef class DistanceFunctionContainer:
     def __dealloc(self):
         pass
 
-'''
-
-cdef class DataSet:
-    cdef c_DataSet *thisptr
-
-    def __cinit__(self, threads = 1):
-        self.thisptr = new_DataSet(threads)
-
-    def __dealloc__(self):
-        del_DataSet(self.thisptr)
-
-    def getstuff(self):
-        return 
-
-    def getTopKSimilar (self, actor, k = -1, df = DistanceFunctionContainer()):
-        if type(df) is not DistanceFunctionContainer:
-            raise TypeError("a DistanceFunctionContainer is required")
-        cdef FloatKeyVec foo = self.thisptr.getTopKSimilar(actor, k,
-                (<DistanceFunctionContainer>df).getFunc())
-
-        cdef size_t size = foo.c_size()
-        return [(foo.get(n).first, int(foo.get(n).second)) for n in range(size)]
-
-    def addOrUpdateValue (self, actor, obj, value):
-        self.thisptr.addOrUpdateValue(actor, obj, value)
-
-    def removeActor(self, actor):
-        self.thisptr.removeActor(actor)
-
-    def removeValue(self, actor, obj):
-        self.thisptr.removeValue(actor, obj)
-
-'''
+#
+#cdef class DataSet:
+#    cdef c_DataSet *thisptr
+#
+#    def __cinit__(self, threads = 1):
+#        self.thisptr = new_DataSet(threads)
+#
+#    def __dealloc__(self):
+#        del_DataSet(self.thisptr)
+#
+#    def getstuff(self):
+#        return 
+#
+#    def getTopKSimilar (self, actor, k = -1, df = DistanceFunctionContainer()):
+#        if type(df) is not DistanceFunctionContainer:
+#            raise TypeError("a DistanceFunctionContainer is required")
+#        cdef FloatKeyVec foo = self.thisptr.getTopKSimilar(actor, k,
+#                (<DistanceFunctionContainer>df).getFunc())
+#
+#        cdef size_t size = foo.c_size()
+#        return [(foo.get(n).first, int(foo.get(n).second)) for n in range(size)]
+#
+#    def addOrUpdateValue (self, actor, obj, value):
+#        self.thisptr.addOrUpdateValue(actor, obj, value)
+#
+#    def removeActor(self, actor):
+#        self.thisptr.removeActor(actor)
+#
+#    def removeValue(self, actor, obj):
+#        self.thisptr.removeValue(actor, obj)
+#
 
 cdef class StringDataSet:
     cdef c_DataSet *dsptr
@@ -107,6 +107,14 @@ cdef class StringDataSet:
 
     def getstuff(self):
         return 
+
+    def getRecs (self, actor, k = -1, df = DistanceFunctionContainer()):
+        if type(df) is not DistanceFunctionContainer:
+            raise TypeError("a DistanceFunctionContainer is required")
+        cdef FloatKeyVec foo = self.thisptr.getRecs(actor, k, (<DistanceFunctionContainer>df).getFunc())
+        cdef size_t size = foo.c_size()
+        return [(foo.get(n).first, \
+            self.thisptr.lookupObject(int(foo.get(n).second))) for n in range(size)]
 
     def getTopKSimilar (self, actor, k = -1, df = DistanceFunctionContainer()):
         if type(df) is not DistanceFunctionContainer:
