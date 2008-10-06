@@ -4,6 +4,10 @@ from twisted.internet import reactor
 from twisted.application import internet, service
 from lib.libreccage import StringDataSet
 
+import psycopg2 as dbapi
+
+
+
 encodejson = cjson.encode
 decodejson = cjson.decode
 
@@ -15,8 +19,9 @@ UNKNOWN_EXCEPTION=4
 
 
 class DataSetHandler():
-    def __init__(self, nThreads = 1):
+    def __init__(self, conn,  nThreads = 1):
         self.dataSet = StringDataSet(nThreads)
+        self.conn = conn
 
     def _genError(self, code, message):
         return {'status':'fail',
@@ -44,7 +49,26 @@ class DataSetHandler():
         r = self._checkArgs('add', ['actor', 'object', 'value'], args)
         if r is not None: return r
 
-        self.dataSet.addOrUpdateValue(args['actor'], args['object'], float(args['value']))
+        actor = args['actor']
+        object=args['object']
+        value = float(args['value'])
+        self.dataSet.addOrUpdateValue(actor, object, value)
+
+
+
+        
+        #TODO optimize this with a UDF
+        cur = self.conn.cursor()
+        cur.execute('''select 1 from actors where name = %s and object = %s limit 1''', (actor, object))
+        if cur.rowcount == 0:
+            print 'pew pewa'
+            cur.execute('''insert into actors values (%s, %s, %s)''', (actor, object, value))
+            print 'pew pewb'
+        else:
+            print 'pew pewu'
+            cur.execute('''UPDATE actors SET value = %s where name = %s and object = %s''', (value, actor, object))
+        cur.close()
+        print 'pew pew'
 
         return self._genSuccess('successfully added (%s,%s) with value %s' %\
                           (args['actor'], args['object'], args['value']))
@@ -53,8 +77,15 @@ class DataSetHandler():
         r = self._checkArgs('del', ['actor', 'object'], args)
         if r is not None: return r
 
-        self.dataSet.removeValue(args['actor'], args['object'])
+        actor = args['actor']
+        object=args['object']
 
+        self.dataSet.removeValue(actor, object)
+
+        cur = self.conn.cursor()
+        cur.execute('''DELETE FROM actors WHERE name = %s AND object = %s''', (actor, object))
+        cur.close()
+    
         return self._genSuccess('successfully removed (%s,%s)' %\
                           (args['actor'], args['object']))
 
@@ -83,26 +114,39 @@ class DataSetHandler():
         if 'method' not in args:
             return self._genError(NO_METHOD, 'request requires method')
         method = args['method']
-        try:
-            if method == 'add':
-                return self._add(args)
-            elif method == 'del':
-                return self._del(args)
-            elif method == 'getTopSimilar':
-                return self._getTopSimilar(args)
-            elif method == 'getRecs':
-                return self._getRecs(args)
-            else:
-                return self._genError(UNKNOWN_METHOD, 'unknown method "%s"' % method)
-        except Exception:
-            return self._genError(UNKNOWN_EXCEPTION, 'Unknown exception')
+        #try:
+        if method == 'add':
+            return self._add(args)
+        elif method == 'del':
+            return self._del(args)
+        elif method == 'getTopSimilar':
+            return self._getTopSimilar(args)
+        elif method == 'getRecs':
+            return self._getRecs(args)
+        else:
+            return self._genError(UNKNOWN_METHOD, 'unknown method "%s"' % method)
+#        except Exception:
+#            self.conn.rollback()
+#            return self._genError(UNKNOWN_EXCEPTION, 'Unknown exception')
 
-
-
-
-
-
-
+    def catchup(self):
+        n = 1
+        out = open("/home/mike/reccage/out", "w")
+        print "doing catchup"
+        cur = self.conn.cursor()
+        cur.execute("""begin""")
+        cur.execute("""declare c1 cursor for select * from actors limit 100000""")
+        while True:
+            cur.execute("""fetch 100000 from c1""")
+            if cur.rowcount == 0: break
+            for row in cur:
+                self.dataSet.addOrUpdateValue(row[0], row[1], row[2])
+                if n % 100000 == 0:
+                    print n
+                n += 1
+        cur.execute("""commit""")
+        cur.close()
+            
 class WebHandler(resource.Resource):
     isLeaf = True
 
@@ -119,13 +163,16 @@ class WebHandler(resource.Resource):
         request.setHeader("Content-type", "text/javascript")
         nargs = {}
         for k,v in request.args.items(): nargs[k] = v[0] #we only want the first of each args
-        return encodejson([self.handler.handleData(nargs)])
+        return encodejson([self.handler.handleData(nargs)]) + '\n'
 
 
 port = 8007#int(sys.argv[1])
 port2 = 8080#int(sys.argv[1])
 
-site = server.Site(WebHandler(DataSetHandler(4))) #TODO change 4 to an argument
+conn =dbapi.connect("dbname='mike' user='mike' host='localhost'")
+dsh = DataSetHandler(conn, 2)
+dsh.catchup()
+site = server.Site(WebHandler(dsh)) #TODO change 4 to an argument
 
 myService = service.MultiService()
 #internet.TCPServer(port, factory).setServiceParent(myService)

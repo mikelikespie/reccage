@@ -10,13 +10,11 @@ ext_modules = [Extension(
         language="c++",              # this causes Cython to create C++ source
         include_dirs=['.'],          # usual stuff
         libraries=['pthread'],             # ditto
-        extra_link_args=[],       # if needed
-        cmdclass = {'build_ext': build_ext}),]
+        ),]
 
 setup(
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = ext_modules
-
+    ext_modules = ext_modules,
+    cmdclass = {'build_ext': build_ext}
 )
 
 
