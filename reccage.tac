@@ -1,8 +1,13 @@
 import cjson
+from zope.interface import implements
 from twisted.web import server, resource
 from twisted.internet import reactor
 from twisted.application import internet, service
+from twisted.internet.protocol import Factory
+from twisted.protocols.basic import NetstringReceiver
 from lib.libreccage import StringDataSet
+import sys
+from twisted.python import usage
 
 import psycopg2 as dbapi
 
@@ -16,14 +21,15 @@ NO_METHOD=1
 UNKNOWN_METHOD=2
 MISSING_ARGUMENT=3
 UNKNOWN_EXCEPTION=4
-
+INVALID_JSON=5
+INVALID_DATA=6
 
 class DataSetHandler():
     def __init__(self, conn,  nThreads = 1):
         self.dataSet = StringDataSet(nThreads)
         self.conn = conn
 
-    def _genError(self, code, message):
+    def genError(self, code, message):
         return {'status':'fail',
                 'error': {'code':int(code),
                           'message':message}}
@@ -39,7 +45,7 @@ class DataSetHandler():
         '''
         for arg in req_args:
             if arg not in args:
-                return self._genError(MISSING_ARGUMENT,\
+                return self.genError(MISSING_ARGUMENT,\
                         'method "%s" requires argument "%s"' % (method, arg))
         return None
 
@@ -112,22 +118,23 @@ class DataSetHandler():
 
     def handleData(self, args):
         if 'method' not in args:
-            return self._genError(NO_METHOD, 'request requires method')
+            return self.genError(NO_METHOD, 'request requires method')
         method = args['method']
-        #try:
-        if method == 'add':
-            return self._add(args)
-        elif method == 'del':
-            return self._del(args)
-        elif method == 'getTopSimilar':
-            return self._getTopSimilar(args)
-        elif method == 'getRecs':
-            return self._getRecs(args)
-        else:
-            return self._genError(UNKNOWN_METHOD, 'unknown method "%s"' % method)
-#        except Exception:
-#            self.conn.rollback()
-#            return self._genError(UNKNOWN_EXCEPTION, 'Unknown exception')
+        try:
+            if method == 'add':
+                return self._add(args)
+            elif method == 'del':
+                return self._del(args)
+            elif method == 'getTopSimilar':
+                return self._getTopSimilar(args)
+            elif method == 'getRecs':
+                return self._getRecs(args)
+            else:
+                return self.genError(UNKNOWN_METHOD, 'unknown method "%s"' % method)
+        except Exception, e:
+            sys.stderr.write('%s' % e)
+            self.conn.rollback()
+            return self.genError(UNKNOWN_EXCEPTION, 'Unknown exception')
 
     def catchup(self):
         n = 1
@@ -166,6 +173,42 @@ class WebHandler(resource.Resource):
         return encodejson([self.handler.handleData(nargs)]) + '\n'
 
 
+class ReccageProtocol(NetstringReceiver):
+
+    def __init__(self, handler):
+        self.handler = handler
+        print "Made connection"
+
+    def stringReceived(self, data):
+        print 'got string'
+        try:
+            nargs = decodejson(data)
+            if type(nargs) != dict:
+                data = self.handler.genError(INVALID_DATA, 'JSON data must be dict')
+            else:
+                data = self.handler.handleData(nargs)
+        except cjson.DecodeError, e:
+            data = self.handler.genError(INVALID_JSON, 'strings must be in valid json')
+
+
+
+        self.sendString(encodejson(data) + '\n')
+        
+    def connectionLost(self, reason):
+        print "Closing connection:\n%s" % reason
+
+class ReccageFactory(Factory):
+    protocol = ReccageProtocol
+    def __init__(self, handler):
+        self.handler = handler
+
+    def buildProtocol(self, addr):
+        p = self.protocol(self.handler)
+        p.factory = self
+        return p
+
+print sys.argv
+
 port = 8007#int(sys.argv[1])
 port2 = 8080#int(sys.argv[1])
 
@@ -174,8 +217,11 @@ dsh = DataSetHandler(conn, 2)
 dsh.catchup()
 site = server.Site(WebHandler(dsh)) #TODO change 4 to an argument
 
+factory = ReccageFactory(dsh)
+
+
 myService = service.MultiService()
-#internet.TCPServer(port, factory).setServiceParent(myService)
+internet.TCPServer(port, factory).setServiceParent(myService)
 internet.TCPServer(port2, site).setServiceParent(myService)
 
 application = service.Application( "reccage" )
