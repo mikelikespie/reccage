@@ -130,7 +130,7 @@ class DataSetHandler():
 
     def catchup(self):
         n = 1
-        out = open("/home/mike/reccage/out", "w")
+        cur.execute("create table actors (actor varchar(512), object varchar(512), value double)")
         print "doing catchup"
         cur = self.conn.cursor()
         cur.execute("""begin""")
