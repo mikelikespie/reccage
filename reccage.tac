@@ -11,8 +11,6 @@ from twisted.python import usage
 
 import psycopg2 as dbapi
 
-
-
 encodejson = cjson.encode
 decodejson = cjson.decode
 
@@ -49,8 +47,6 @@ class DataSetHandler():
                         'method "%s" requires argument "%s"' % (method, arg))
         return None
 
-        
-
     def _add(self, args):
         r = self._checkArgs('add', ['actor', 'object', 'value'], args)
         if r is not None: return r
@@ -59,9 +55,6 @@ class DataSetHandler():
         object=args['object']
         value = float(args['value'])
         self.dataSet.addOrUpdateValue(actor, object, value)
-
-
-
         
         #TODO optimize this with a UDF
         cur = self.conn.cursor()
@@ -114,7 +107,6 @@ class DataSetHandler():
 
         ret = self.dataSet.getRecs(args['actor'], topK)
         return self._genSuccess(ret)
-        
 
     def handleData(self, args):
         if 'method' not in args:
@@ -190,8 +182,6 @@ class ReccageProtocol(NetstringReceiver):
         except cjson.DecodeError, e:
             data = self.handler.genError(INVALID_JSON, 'strings must be in valid json')
 
-
-
         self.sendString(encodejson(data) + '\n')
         
     def connectionLost(self, reason):
@@ -218,7 +208,6 @@ dsh.catchup()
 site = server.Site(WebHandler(dsh)) #TODO change 4 to an argument
 
 factory = ReccageFactory(dsh)
-
 
 myService = service.MultiService()
 internet.TCPServer(port, factory).setServiceParent(myService)
