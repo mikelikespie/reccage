@@ -61,38 +61,6 @@ cdef class DistanceFunctionContainer:
     def __dealloc(self):
         pass
 
-#
-#cdef class DataSet:
-#    cdef c_DataSet *thisptr
-#
-#    def __cinit__(self, threads = 1):
-#        self.thisptr = new_DataSet(threads)
-#
-#    def __dealloc__(self):
-#        del_DataSet(self.thisptr)
-#
-#    def getstuff(self):
-#        return 
-#
-#    def getTopKSimilar (self, actor, k = -1, df = DistanceFunctionContainer()):
-#        if type(df) is not DistanceFunctionContainer:
-#            raise TypeError("a DistanceFunctionContainer is required")
-#        cdef FloatKeyVec foo = self.thisptr.getTopKSimilar(actor, k,
-#                (<DistanceFunctionContainer>df).getFunc())
-#
-#        cdef size_t size = foo.c_size()
-#        return [(foo.get(n).first, int(foo.get(n).second)) for n in range(size)]
-#
-#    def addOrUpdateValue (self, actor, obj, value):
-#        self.thisptr.addOrUpdateValue(actor, obj, value)
-#
-#    def removeActor(self, actor):
-#        self.thisptr.removeActor(actor)
-#
-#    def removeValue(self, actor, obj):
-#        self.thisptr.removeValue(actor, obj)
-#
-
 cdef class StringDataSet:
     cdef c_DataSet *dsptr
     cdef c_StringDataSet *thisptr
