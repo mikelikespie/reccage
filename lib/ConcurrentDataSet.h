@@ -19,15 +19,14 @@
  * CLASS IS NOT SYNCHRONIZED
  */
 
-using namespace std; // THIS IS BAD< but I am lazy
-class ConcurrentDataSet: public DataSet;
+class ConcurrentDataSet: public DataSet {
 
 private:
 	pthread_t thread;
 	pthread_mutex_t mutex_run;
 	pthread_cond_t cond_run;
 
-	struct;
+	struct {
 		ObjectValueMap *actorMap;
 		DistanceFunction df;
 		int k; //-1 = return all

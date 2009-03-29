@@ -15,3 +15,6 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -rf $(EXECUTABLE) *.o
+
+python:
+	python setup.py build_ext --inplace

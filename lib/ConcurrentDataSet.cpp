@@ -7,20 +7,15 @@
 
 #include "ConcurrentDataSet.h"
 
-/*
-template ConcurrentDataSet::<> void *ConcurrentDataSet<const char *>::startRoutine(void *me)
-{
-	((ConcurrentDataSet*)me)->loop();
-	return NULL;
-}
-*/
-void ConcurrentDataSet::*ConcurrentDataSet::startRoutine(void *me)
+using namespace std;
+
+void *ConcurrentDataSet::startRoutine(void *me)
 {
 	((ConcurrentDataSet*)me)->loop();
 	return NULL;
 }
 
-ConcurrentDataSet() {
+ConcurrentDataSet::ConcurrentDataSet() {
 	pthread_mutex_init(&mutex_run, NULL);
 	pthread_cond_init(&cond_run, NULL);
 	finished = false;
@@ -29,7 +24,7 @@ ConcurrentDataSet() {
 
 }
 
-virtual ConcurrentDataSet::~ConcurrentDataSet() {
+ConcurrentDataSet::~ConcurrentDataSet() {
 	//Signal for us to exit
 	pthread_mutex_lock(&mutex_run);
 	exit = true;
@@ -67,7 +62,7 @@ FloatKeyVec ConcurrentDataSet::getTopKSimilar() {
 }
 
 
-inline ConcurrentDataSet::void loop() {
+void ConcurrentDataSet::loop() {
 	while (true) {
 		//Now we have to wait for the mutex to unlock
 		pthread_mutex_lock(&mutex_run);
