@@ -1,0 +1,3 @@
+include iwell/config/deployment.ini_tmpl
+recursive-include iwell/public *
+recursive-include iwell/templates *
