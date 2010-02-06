@@ -33,12 +33,12 @@ ext_modules = [
 ]
 
 setup(
-    name='Reccage',
+    name='reccage',
     url='http://github.com/mikelikespie/reccage',
     author='Mike Lewis',
     author_email='mikelikespie@gmail.com',
     package_dir = {'reccage' : 'src'},
-    packages=['reccage'],
+    packages=[],
     ext_modules = ext_modules,
     cmdclass = {'build_ext': build_ext}
 )
