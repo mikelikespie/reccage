@@ -1,18 +1,18 @@
-import cjson
+import json
 from zope.interface import implements
 from twisted.web import server, resource
 from twisted.internet import reactor
 from twisted.application import internet, service
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import NetstringReceiver
-from lib.libreccage import StringDataSet
+from libreccage import StringDataSet
 import sys
 from twisted.python import usage
 
 import psycopg2 as dbapi
 
-encodejson = cjson.encode
-decodejson = cjson.decode
+encodejson = json.dumps
+decodejson = json.loads
 
 #errors
 NO_METHOD=1

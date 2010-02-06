@@ -5,6 +5,7 @@
  *      Author: Mike
  */
 
+#include "mytypes.h"
 #include "ConcurrentDataSetPool.h"
 #include "futil.h"
 
@@ -81,7 +82,7 @@ FloatKeyVec ConcurrentDataSetPool::getTopKSimilar(ObjectValueMap *actorMap, int 
 	return ret;
 }
 
-void mergeRecs(ItemRecMap &a, ItemRecMap &b) {
+void ConcurrentDataSetPool::mergeRecs(ItemRecMap &a, ItemRecMap &b) {
 	ItemRecMap::iterator i  = a.begin();
 	ItemRecMap::iterator i2 = b.begin();
 
@@ -158,7 +159,7 @@ void ConcurrentDataSetPool::removeActor(KeyId actor) {
 		removeActor(actor);
 }
 
-virtual ConcurrentDataSetPool::~ConcurrentDataSetPool() {
+ConcurrentDataSetPool::~ConcurrentDataSetPool() {
 	delete[] dataSets;
 }
 

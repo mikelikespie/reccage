@@ -13,6 +13,8 @@
 #include <vector>
 #include <string.h>
 
+#include "mytypes.h"
+
 struct strlt
 {
   inline bool operator()(const char* s1, const char* s2) const
