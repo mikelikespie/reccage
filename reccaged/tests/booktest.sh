@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This example is from the book Programming Collective Intelligence by Toby Segaran
+
 host=$1
 
 
